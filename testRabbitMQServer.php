@@ -9,22 +9,26 @@ function doLogin($username,$password)
 {
     $dbHelper = new DatabaseHelper();    
 
+    if(!$dbHelper->connect())
+    {	
+	return array("returnCode" => '1', 'message'=>"Error connecting to server");
+    }
+
+//print_r($dbHelper);
+
     $info = $dbHelper->getUserInfo($username, $password);
-    print_r($info);
-    // lookup username in databas
     
     if($info)
     {
-	return array('returnCode' => '0', 'message' => 'Server received request and processed', 
-		'firstname' => $info['first_name'], 'lastname' => $info['last_name']);
+	//return array('returnCode' => '0', 'message' => 'Server received request and processed', 
+	//	'firstname' => $info['first_name'], 'lastname' => $info['last_name']);
+	
+	return (array('returnCode' => '0', 'message' => 'Server received request and processed') + $info);
     }else
     {
 	return array("returnCode" => '1', 'message'=>"Login unsuccessful");
     }
 
-    // check password
-    //return true;
-    //return false if not valid
 }
 
 function doRegister($request)
@@ -39,11 +43,20 @@ function doRegister($request)
     return array("returnCode" => '0', 'message'=>"Registration unsuccessful");
 }
 
+function logMessage($request)
+{
+	$logFile = fopen("log.txt", "a");
+
+	fwrite($logFile, $request['message'] .'\n\n');
+
+	return true;
+}
+
 function requestProcessor($request)
 {
   echo "received request".PHP_EOL;
   var_dump($request);
-  
+  echo 'after dump';
   if(!isset($request['type']))
   {
     return "ERROR: unsupported message type";
@@ -56,6 +69,8 @@ function requestProcessor($request)
       return doLogin($request['username'],$request['password']);
     case "validate_session":
       return doValidate($request['sessionId']);
+    case "log":
+      return logMessage($request);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

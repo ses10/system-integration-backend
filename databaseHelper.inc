@@ -1,19 +1,34 @@
 <?php
+require_once('path.inc');
+require_once('get_host_info.inc');
+require_once('rabbitMQLib.inc');
+
 
 class DatabaseHelper
 {
 	private $conn;
 
-	public function __construct()
+	public function connect()
 	{
 		try
 		{
-			$this->conn = new PDO('mysql:host=192.168.2.40;dbname=it490', 'ds646', 'abc123');
+			//$this->conn = new PDO('mysql:host=192.168.2.40;dbname=it490', 'ds646', 'abc123');
+			$this->conn = new PDO('mysql:host=localhost;dbname=it490', 'root', 'qwerty');
+			return true;
 		}
 		catch(PDOException $e)
 		{
-			echo 'Error: ' . $e->getMessage();
+			$message =  'Error: ' . $e->getMessage();
+			
+			//log the error 
+			$client = new rabbitMQClient("testRabbitMQ.ini","testServer");			
+			$request = array();
+			$request['type'] = "log";
+			$request['message'] = $message;
+			$response = $client->publish($request);
 		}
+		
+		return false;
 	}
 
 	public function getUserInfo($username, $password)
@@ -21,10 +36,19 @@ class DatabaseHelper
 		$stmt = $this->conn->prepare('SELECT first_name, last_name FROM user WHERE username = :un AND password = :pw');
 		$stmt->bindParam(':un', $username);
 		$stmt->bindParam(':pw', $password);
-
 		$stmt->setFetchMode(PDO::FETCH_ASSOC);
 		$stmt->execute();
-		return $stmt->fetch();
+		
+		$result = $stmt->fetch();
+		
+		$stmt = $this->conn->prepare('SELECT * from userCar where username = :un');
+		$stmt->bindParam(':un', $username);
+		$stmt->setFetchMode(PDO::FETCH_ASSOC);
+		$stmt->execute();
+	
+		$result += $stmt->fetchAll();
+		
+		return $result;
 	}
 	
 	//return true if successful
