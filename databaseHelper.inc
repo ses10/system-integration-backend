@@ -46,7 +46,8 @@ class DatabaseHelper
 		$stmt->setFetchMode(PDO::FETCH_ASSOC);
 		$stmt->execute();
 	
-		$result += $stmt->fetchAll();
+		//$result += $stmt->fetchAll();
+		$result['cars'] = $stmt->fetchAll();
 		
 		return $result;
 	}
