@@ -14,14 +14,11 @@ function doLogin($username,$password)
 	return array("returnCode" => '1', 'message'=>"Error connecting to server");
     }
 
-//print_r($dbHelper);
 
     $info = $dbHelper->getUserInfo($username, $password);
     
     if($info)
     {
-	//return array('returnCode' => '0', 'message' => 'Server received request and processed', 
-	//	'firstname' => $info['first_name'], 'lastname' => $info['last_name']);
 	
 	return (array('returnCode' => '0', 'message' => 'Server received request and processed') + $info);
     }else
@@ -52,11 +49,38 @@ function logMessage($request)
 	return true;
 }
 
+function handleApiRequest($request)
+{
+	
+	$client = new rabbitMQClient("apiRabbitMQ.ini","testServer");
+	
+	$req = array();
+	$req['type'] = "apiRequest";
+	//$req['param'] = array();
+
+	if( count($request['param']) == 0)
+	{
+		$req['param'] = array();
+	}
+	else if( count($request['param']) == 1  )
+	{
+		$req['param'] = array('year' => $request['param']['year']);
+	}
+	else if( count($request['param']) == 2 )
+	{
+		$req['param'] = array('year' => $request['param']['year'], 'make' => $request['param']['make']);
+	}
+	
+	$response = $client->send_request($req);
+	
+	return $response;
+}
+
 function requestProcessor($request)
 {
   echo "received request".PHP_EOL;
-  var_dump($request);
-  echo 'after dump';
+  //var_dump($request);
+//  echo 'after dump';
   if(!isset($request['type']))
   {
     return "ERROR: unsupported message type";
@@ -71,6 +95,8 @@ function requestProcessor($request)
       return doValidate($request['sessionId']);
     case "log":
       return logMessage($request);
+    case "apiRequest":
+      return handleApiRequest($request);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }
