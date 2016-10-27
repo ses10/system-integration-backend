@@ -51,6 +51,20 @@ class DatabaseHelper
 		
 		return $result;
 	}
+
+	public function getCarInfo($year, $make, $model)
+	{
+		$stmt = $this->conn->prepare('SELECT * from recall WHERE year = :yr AND model = :mdl AND make = :mke');
+		$stmt->bindParam(':yr', $year);
+		$stmt->bindParam(':mdl', $model);
+		$stmt->bindParam(':mke', $make);
+		$stmt->setFetchMode(PDO::FETCH_ASSOC);
+		$stmt->execute();
+
+		$result = $stmt->fetch();
+
+		return $result;	
+	}
 	
 	//return true if successful
 	public function registerUser($username, $password, $firstname, $lastname)
