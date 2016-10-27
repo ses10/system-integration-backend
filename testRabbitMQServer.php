@@ -31,7 +31,12 @@ function doLogin($username,$password)
 function doRegister($request)
 {
     $dbHelper = new DatabaseHelper();
-    
+   
+    if(!$dbHelper->connect())
+    {
+        return array("returnCode" => '1', 'message'=>"Error connecting to server");
+    }
+ 
     if($dbHelper->registerUser($request['username'], $request['password'], $request['firstName'], $request['lastName']))
     {
 	return array("returnCode" => '1', 'message'=>"Registration successful");
@@ -70,8 +75,22 @@ function handleApiRequest($request)
 	{
 		$req['param'] = array('year' => $request['param']['year'], 'make' => $request['param']['make']);
 	}
+	else if( count($request['param']) == 3 )
+	{
+		$req['param'] = array('year' => $request['param']['year'], 'make' => $request['param']['make'], 'model' => $request['param']['model']);
+		
+		$dbHelper = new DatabaseHelper();
+	
+		if(!$dbHelper->connect())
+    		{
+        		return array("returnCode" => '1', 'message'=>"Error connecting to server");
+    		}
+		
+		$dbHelper->addUserCar($request['username'], $request['param']['year'], $request['param']['make'], $request['param']['model']);
+	}
 	
 	$response = $client->send_request($req);
+
 	
 	return $response;
 }
