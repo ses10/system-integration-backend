@@ -41,7 +41,7 @@ class DatabaseHelper
 		
 		$result = $stmt->fetch();
 		
-		$stmt = $this->conn->prepare('SELECT * from userCar where username = :un');
+		$stmt = $this->conn->prepare('SELECT year, make, model from userCar where username = :un');
 		$stmt->bindParam(':un', $username);
 		$stmt->setFetchMode(PDO::FETCH_ASSOC);
 		$stmt->execute();
@@ -66,9 +66,21 @@ class DatabaseHelper
 		return $result;	
 	}
 	
+	public function addUserCar($username, $year, $make, $model)
+	{
+		$stmt = $this->conn->prepare('INSERT INTO userCar VALUES(:un, :yr, :mke, :mdl)');
+		$stmt->bindParam(':un', $username);
+		$stmt->bindParam(':yr', $year);		
+		$stmt->bindParam(':mke', $make);
+		$stmt->bindParam(':mdl', $model);
+
+		$stmt->execute();
+	}
+		
 	//return true if successful
 	public function registerUser($username, $password, $firstname, $lastname)
 	{
+
 		//insert query to user table
 		$stmt = $this->conn->prepare('INSERT INTO user VALUES(:un, :pw, :fname, :lname)');
 		$stmt->bindParam(':un', $username);
