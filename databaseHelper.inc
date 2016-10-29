@@ -52,7 +52,8 @@ class DatabaseHelper
 		return $result;
 	}
 
-	public function getCarInfo($year, $make, $model)
+	
+	public function getCarRecalls($year, $make, $model)
 	{
 		$stmt = $this->conn->prepare('SELECT * from recall WHERE year = :yr AND model = :mdl AND make = :mke');
 		$stmt->bindParam(':yr', $year);
@@ -61,9 +62,33 @@ class DatabaseHelper
 		$stmt->setFetchMode(PDO::FETCH_ASSOC);
 		$stmt->execute();
 
-		$result = $stmt->fetch();
+		$result = $stmt->fetchAll();
 
 		return $result;	
+	}
+
+	public function insertRecalls($recalls)
+	{
+		foreach($recalls as $recall)
+		{
+
+
+			$stmt = $this->conn->prepare('INSERT INTO recall VALUES(:yr, :mke, :mdl, :manu, :camNum, :rep, :compon, :sum, :con, :rem, :notes, CURDATE())');
+
+			$stmt->bindParam(':yr', $recall['ModelYear']);
+			$stmt->bindParam(':mke', $recall['Make']);
+			$stmt->bindParam(':mdl', $recall['Model']);
+			$stmt->bindParam(':manu', $recall['Manufacturer']);
+			$stmt->bindParam(':camNum', $recall['NHTSACampaignNumber']);
+			$stmt->bindParam(':rep', $recall['ReportReceivedDate']);
+			$stmt->bindParam(':compon', $recall['Component']);
+			$stmt->bindParam(':sum', $recall['Summary']);
+			$stmt->bindParam(':con', $recall['Conequence']);
+			$stmt->bindParam(':rem', $recall['Remedy']);
+			$stmt->bindParam(':notes', $recall['Notes']);
+
+			$stmt->execute();
+		}
 	}
 	
 	public function addUserCar($username, $year, $make, $model)
@@ -90,7 +115,7 @@ class DatabaseHelper
 
 		return $stmt->execute();
 	}
-
+	
 	public function __destruct()
 	{
 		$this->conn = null;
