@@ -75,8 +75,10 @@ function handleApiRequest($request)
 	{
 		$req['param'] = array('year' => $request['param']['year'], 'make' => $request['param']['make']);
 	}
+	//user is adding car to their list
 	else if( count($request['param']) == 3 )
 	{
+		
 		$req['param'] = array('year' => $request['param']['year'], 'make' => $request['param']['make'], 'model' => $request['param']['model']);
 		
 		$dbHelper = new DatabaseHelper();
@@ -87,12 +89,44 @@ function handleApiRequest($request)
     		}
 		
 		$dbHelper->addUserCar($request['username'], $request['param']['year'], $request['param']['make'], $request['param']['model']);
+
+
+		$recalls = $dbHelper->getCarRecalls($request['param']['year'], $request['param']['make'], $request['param']['model']);
+		//hit the api for recalls 
+		if( empty($recalls) )
+		{
+			//no recall in db so go to api
+			$response = $client->send_request($req);
+
+			$response = json_decode($response, true);
+			$recalls = $response['Results'];	
+	
+			//insert recalls into db
+			$dbHelper->insertRecalls($recalls);
+			
+		}
+		return json_encode(array("returnCode" => '0', 'message'=>"Server received request and processed"));
 	}
 	
 	$response = $client->send_request($req);
 
 	
 	return $response;
+}
+
+function getRecalls($request)
+{
+
+    $dbHelper = new DatabaseHelper();
+
+    if(!$dbHelper->connect())
+    {
+        return array("returnCode" => '1', 'message'=>"Error connecting to server");
+    }
+	
+    $res = $dbHelper->getCarRecalls($request['param']['year'], $request['param']['make'], $request['param']['model']);
+    print_r($res);
+    return json_encode($res);	
 }
 
 function requestProcessor($request)
@@ -116,6 +150,8 @@ function requestProcessor($request)
       return logMessage($request);
     case "apiRequest":
       return handleApiRequest($request);
+    case "getRecalls": 
+      return getRecalls($request);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }
