@@ -40,6 +40,7 @@ class DatabaseHelper
 		$stmt->execute();
 		
 		$result = $stmt->fetch();
+
 		
 		$stmt = $this->conn->prepare('SELECT year, make, model from userCar where username = :un');
 		$stmt->bindParam(':un', $username);
@@ -114,6 +115,19 @@ class DatabaseHelper
 		$stmt->bindParam('lname', $lastname);
 
 		return $stmt->execute();
+	}
+	
+	public function checkCredentials($username, $password)
+	{	
+		$stmt = $this->conn->prepare('SELECT password FROM user WHERE username = :un');
+		$stmt->bindParam(':un', $username);
+		$stmt->setFetchMode(PDO::FETCH_ASSOC);	
+		$stmt->execute();
+
+		if( $password == $stmt->fetch()['password'] )
+			return true;
+		else
+			return false;
 	}
 	
 	public function __destruct()
