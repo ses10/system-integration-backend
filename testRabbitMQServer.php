@@ -47,9 +47,11 @@ function doRegister($request)
 
 function logMessage($request)
 {
+	echo $request['message'];
+
 	$logFile = fopen("log.txt", "a");
 
-	fwrite($logFile, $request['message'] .'\n\n');
+	fwrite($logFile, $request['message'] ."\n");
 
 	return true;
 }
