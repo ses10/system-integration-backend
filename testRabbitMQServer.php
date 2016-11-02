@@ -14,14 +14,20 @@ function doLogin($username,$password)
 	return array("returnCode" => '1', 'message'=>"Error connecting to server");
     }
 
-
-    $info = $dbHelper->getUserInfo($username, $password);
+    if( $dbHelper->checkCredentials($username, $password) )
+    {
+	$info = $dbHelper->getUserInfo($username, $password);	
+	return (array('returnCode' => '0', 'message' => 'Server received request and processed') + $info);
+    }
     
-    if($info)
+//$info = $dbHelper->getUserInfo($username, $password);
+    
+    /*if($info)
     {
 	
 	return (array('returnCode' => '0', 'message' => 'Server received request and processed') + $info);
-    }else
+    }*/
+    else
     {
 	return array("returnCode" => '1', 'message'=>"Login unsuccessful");
     }
@@ -47,6 +53,7 @@ function doRegister($request)
 
 function logMessage($request)
 {
+	echo 'a log has been recieved';
 	echo $request['message'];
 
 	$logFile = fopen("log.txt", "a");
