@@ -9,8 +9,8 @@ require_once('rabbitMQLib.inc');
 
         $req = array();
         $req['type'] = "apiRequest";
-        $req['param'] = array('year' => '2001', 'make' => "Ford", 'model' => 'Focus');
-//	$req['param'] = array();	
+        $req['param'] = array('year' => '2001', 'make' => 'ford', 'model' => 'focus'); //'model' => 'Focus');
+	//$req['param'] = array();	
 
         $res = $client->send_request($req);
 

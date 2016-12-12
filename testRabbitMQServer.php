@@ -97,11 +97,12 @@ function handleApiRequest($request)
         		return array("returnCode" => '1', 'message'=>"Error connecting to server");
     		}
 		
-		$dbHelper->addUserCar($request['username'], $request['param']['year'], $request['param']['make'], $request['param']['model']);
+		//add the new usercar and get id
+		$id = $dbHelper->addUserCar($request['username'], $request['param']['year'], $request['param']['make'], $request['param']['model']);
 
-
+		//check db for any recalls of recent added car
 		$recalls = $dbHelper->getCarRecalls($request['param']['year'], $request['param']['make'], $request['param']['model']);
-		//hit the api for recalls 
+		//hit the api for recalls if no results
 		if( empty($recalls) )
 		{
 			//no recall in db so go to api
@@ -114,6 +115,10 @@ function handleApiRequest($request)
 			$dbHelper->insertRecalls($recalls);
 			
 		}
+
+		//add the new car and its recalls to UserCarRecalls
+		$dbHelper->addUserCarRecall($id);		
+		
 		return json_encode(array("returnCode" => '0', 'message'=>"Server received request and processed"));
 	}
 	
@@ -134,7 +139,7 @@ function getRecalls($request)
     }
 	
     $res = $dbHelper->getCarRecalls($request['param']['year'], $request['param']['make'], $request['param']['model']);
-    print_r($res);
+    //print_r($res);
     return json_encode($res);	
 }
 
