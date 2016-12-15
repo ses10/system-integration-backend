@@ -11,7 +11,19 @@ class DatabaseHelper
 	public function connect()
 	{
 		try
-		{
+		{/*
+			$host = "192.168.2.42";
+			exec("ping -c 1 -w 1 " . $host, $output, $result);
+
+			if($result == 0)
+			{
+			  $this->conn = new PDO('mysql:host=192.168.2.42;dbname=recall', 'test', 'abc123');
+			}
+			else
+			{
+			  $this->conn = new PDO('mysql:host=192.168.2.43;dbname=recall', 'test', 'abc123');
+			}
+*/
 			//$this->conn = new PDO('mysql:host=192.168.2.20;dbname=it490', 'root', 'Clloyd20');
 			$this->conn = new PDO('mysql:host=localhost;dbname=it490', 'root', 'qwerty');
 			return true;
@@ -108,6 +120,17 @@ class DatabaseHelper
 		   $recallId = $result['id'];
 		   $this->conn->query("insert into userCarRecall (id, recallId, checked) values($userCarId,$recallId,0)");
 		} 
+	}
+
+	public function removeUserCar($userCarId)
+	{
+		$stmt = $this->conn->prepare('DELETE FROM userCarRecall where id = :id');
+		$stmt->bindParam(':id', $userCarId);
+		$stmt->execute();
+
+		$stmt = $this->conn->prepare('DELETE FROM userCar where id = :id');
+		$stmt->bindParam(':id', $userCarId);
+                $stmt->execute();
 	}
 
 	public function insertRecalls($recalls)

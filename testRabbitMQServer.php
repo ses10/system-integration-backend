@@ -138,9 +138,34 @@ function getRecalls($request)
         return array("returnCode" => '1', 'message'=>"Error connecting to server");
     }
 	
-    $res = $dbHelper->getCarRecalls($request['param']['year'], $request['param']['make'], $request['param']['model']);
-    //print_r($res);
+    //$res = $dbHelper->getCarRecalls($request['param']['year'], $request['param']['make'], $request['param']['model']);
+    $res = $dbHelper->getUserCarRecalls($request['id']);
+	//print_r($res);
     return json_encode($res);	
+}
+
+function toggleRecallCheck($request)
+{
+    $dbHelper = new DatabaseHelper();
+    
+    if(!$dbHelper->connect())
+    {   
+        return array("returnCode" => '1', 'message'=>"Error connecting to server");
+    } 
+
+    return $dbHelper->toggleRecallCheck($request['uuid']);
+}
+
+function deleteUserCar($request)
+{
+    $dbHelper = new DatabaseHelper();
+
+    if(!$dbHelper->connect())
+    {
+        return array("returnCode" => '1', 'message'=>"Error connecting to server");
+    }
+    
+    $dbHelper->removeUserCar($request['id']);
 }
 
 function requestProcessor($request)
@@ -166,6 +191,10 @@ function requestProcessor($request)
       return handleApiRequest($request);
     case "getRecalls": 
       return getRecalls($request);
+    case "toggleRecall":
+      return toggleRecallCheck($request);
+    case "deleteUserCar":
+      deleteUserCar($request);
   }
   return array("returnCode" => '0', 'message'=>"Server received request and processed");
 }

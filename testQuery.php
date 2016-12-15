@@ -12,7 +12,7 @@ $dbHelper->connect();
 
 //print_r($dbHelper->getUserInfo('bob100', '123'));
 
-print_r($dbHelper->getCarRecalls('2001', 'ford', 'focus'));
+//print_r($dbHelper->getCarRecalls('2001', 'ford', 'focus'));
 //print_r($dbHelper->getUserCarRecalls('1'));
 //if($dbHelper->checkCredentials('bob100', '123'))
 //	echo 'yes';
@@ -22,5 +22,7 @@ print_r($dbHelper->getCarRecalls('2001', 'ford', 'focus'));
 //echo($dbHelper->addUserCar('bob100', '2001', 'ford', 'focus'));
 //print_r($dbHelper->addUserCarRecall(10));
 
-//print_r($dbHelper->toggleRecallCheck(1));
+//print_r($dbHelper->toggleRecallCheck(13));
+
+$dbHelper->removeUserCar(14);
 ?>
